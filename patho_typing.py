@@ -334,20 +334,20 @@ def main():
 							exit_info.append('Number of genes with multiple alleles ({number_genes_multiple_alleles}) higher than the maximum allowed ({maximum_number_genes_multiple_alleles})'.format(number_genes_multiple_alleles=sample_data_general['number_genes_multiple_alleles'], maximum_number_genes_multiple_alleles=config['maximum_number_genes_multiple_alleles']))
 
 						if len(exit_info) > 0:
-							if args.noCheckPoint:
-								print '\n' + '\n'.join(exit_info)
-							else:
+							print '\n' + '\n'.join(exit_info) + '\n'
+							e = 'TrueCoverage requirements not fullfill'
+							print '\n' + e + '\n'
+							if not args.noCheckPoint:
 								clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
 								time_taken = utils.runTime(start_time)
-								sys.exit('\n' + '\n'.join(exit_info))
+								sys.exit(e)
 					else:
-						a = 'TrueCoverage module did not run successfully'
-						if args.noCheckPoint:
-							print '\n' + a
-						else:
+						e = 'TrueCoverage module did not run successfully'
+						print '\n' + e + '\n'
+						if not args.noCheckPoint:
 							clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
 							time_taken = utils.runTime(start_time)
-							sys.exit(a)
+							sys.exit(e)
 
 					print '\n'
 					typing_dir = os.path.join(rematch_dir, 'typing', '')
