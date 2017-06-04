@@ -55,12 +55,12 @@ module_timer = functools.partial(utils.timer, name='Module Typing')
 def typing(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_identity, min_gene_depth, outdir):
 	possible_pathotypes = possible_types(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_identity, min_gene_depth)
 	with open(os.path.join(outdir, 'patho_typing.report.txt'), 'wt') as writer:
-		writer.write('\n'.join(possible_pathotypes) + '\n')
-	print '\n'
-	if len(possible_pathotypes) > 0:
-		print 'Pathotypes found:' + '\n'
-		print '\n'.join(possible_pathotypes)
-	else:
-		print 'It was not possible to identify any possible pathotyping match' + '\n'
-	print '\n' + '\n'
+		if len(possible_pathotypes) > 0:
+			writer.write('\n'.join(possible_pathotypes) + '\n')
+			print '\n' + 'Pathotypes found:' + '\n'
+			print '\n'.join(possible_pathotypes) + '\n'
+		else:
+			writer.write('NA' + '\n')
+			print '\n' + 'It was not possible to identify any possible pathotype match' + '\n'
+
 	return None, None
