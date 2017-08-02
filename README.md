@@ -34,13 +34,13 @@ Usage
                            [--trueCoverage] [--noCheckPoint] [--minGeneCoverage N]
                            [--minGeneIdentity N] [--minGeneDepth N]
                            [--doNotRemoveConsensus] [--debug]
-    
+
     In silico pathogenic typing directly from raw Illumina reads
-    
+
     optional arguments:
       -h, --help            show this help message and exit
       --version             Version information
-    
+
     Required options:
       -f /path/to/input/file.fq.gz [/path/to/input/file.fq.gz ...], --fastq /path/to/input/file.fq.gz [/path/to/input/file.fq.gz ...]
                             Path to single OR paired-end fastq files. If two files
@@ -48,7 +48,7 @@ Usage
                             fastq files (default: None)
       -s Yersinia enterocolitica, --species Yersinia enterocolitica
                             Species name (default: None)
-    
+
     General facultative options:
       -o /path/to/output/directory/, --outdir /path/to/output/directory/
                             Path to the directory where the information will be
@@ -56,7 +56,7 @@ Usage
       -j N, --threads N     Number of threads to use (default: 1)
       --trueCoverage        Assess true coverage before continue typing (default:
                             False)
-      --noCheckPoint        DeBug Mode: do not remove temporary files (default:
+      --noCheckPoint        Ignore the true coverage checking point (default:
                             False)
       --minGeneCoverage N   Minimum typing percentage of target reference gene
                             sequence covered to consider a gene to be present
