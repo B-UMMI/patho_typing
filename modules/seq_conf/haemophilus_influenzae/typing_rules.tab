@@ -1,0 +1,8 @@
+#pathotypes	AacsA	AacsB	AacsC	AacsD	BbcsA	BbcsB	BbcsC	BbcsD	CccsA	CccsB	CccsC	CccsD	DdcsA	DdcsB	DdcsC	DdcsD	DdcsE	EecsA	EecsB	EecsC	EecsD	EecsE	EecsF	EecsG	EecsH	FfcsA	FfcsB	FfcsC
+Serotype a	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Serotype b	0	0	0	0	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Serotype c	0	0	0	0	0	0	0	0	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+Serotype d	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0
+Serotype e	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1	1	1	1	1	1	0	0	0
+Serotype f	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1
+Non Typeable	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0

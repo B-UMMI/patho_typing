@@ -1,3 +1,6 @@
+# ignore Hinf
+modules/seq_conf/haemophilus_influenzae
+
 # mpmachado_stuff - file with different mpmachado stuffs
 mpmachado_stuff.*
 
