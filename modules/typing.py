@@ -10,7 +10,7 @@ import utils
 def simplify_data_by_gene(data_by_gene):
     cleaned_data_by_gene = {}
     for counter, data in data_by_gene.items():
-        cleaned_data_by_gene[data['header']] = {'gene_identity': data['gene_identity'], 'gene_coverage': data['gene_coverage'], 'gene_depth': data['gene_mean_read_coverage']}
+        cleaned_data_by_gene[data['header'].lower()] = {'gene_identity': data['gene_identity'], 'gene_coverage': data['gene_coverage'], 'gene_depth': data['gene_mean_read_coverage']}
     return cleaned_data_by_gene
 
 
@@ -26,25 +26,25 @@ def possible_types(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_
             if len(line) > 0:
                 line = line.split('\t')
                 if line[0].startswith('#'):
-                    genes = map(str.lower, line[1:])
+                    genes = line[1:]
                 else:
                     profile = line[1:]
                     congruence = []
                     for x, gene_requirement in enumerate(profile):
-                        gene_requirement = True if gene_requirement == '1' else False if gene_requirement == '0' else None
-                        if gene_requirement is None:
-                            congruence.append(True)
+                        if data_by_gene[genes[x].lower()]['gene_coverage'] >= min_gene_coverage and data_by_gene[genes[x].lower()]['gene_identity'] >= min_gene_identity and data_by_gene[genes[x].lower()]['gene_depth'] >= min_gene_depth:
+                            gene_present = True
+                            genes_present.append(genes[x])
                         else:
-                            if data_by_gene[genes[x]]['gene_coverage'] >= min_gene_coverage and data_by_gene[genes[x]]['gene_identity'] >= min_gene_identity and data_by_gene[genes[x]]['gene_depth'] >= min_gene_depth:
-                                gene_present = True
-                                genes_present.append(genes[x])
-                            else:
-                                gene_present = False
+                            gene_present = False
 
+                        gene_requirement = True if gene_requirement == '1' else False if gene_requirement == '0' else None
+                        if gene_requirement is not None:
                             if gene_present == gene_requirement:
                                 congruence.append(True)
                             else:
                                 congruence.append(False)
+                        else:
+                            congruence.append(True)
                     if all(congruence):
                         possible_pathotypes.append(line[0])
     return possible_pathotypes, list(set(genes_present))
