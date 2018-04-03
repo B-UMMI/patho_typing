@@ -9,7 +9,7 @@ Illumina reads
 
 Copyright (C) 2017 Miguel Machado <mpmachado@medicina.ulisboa.pt>
 
-Last modified: July 06, 2017
+Last modified: April 03, 2018
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import modules.utils as utils
 import modules.run_rematch as run_rematch
 import modules.typing as typing
 
-version = '0.3'
+version = '0.4'
 
 
 def set_reference(species, outdir, script_path, trueCoverage):
@@ -267,7 +267,10 @@ def main():
     parser_optional_general.add_argument('--noCheckPoint', action='store_true', help='Ignore the true coverage checking point')
     parser_optional_general.add_argument('--minGeneCoverage', type=int, metavar='N', help='Minimum typing percentage of target reference gene sequence covered to consider a gene to be present (value between [0, 100])', required=False)
     parser_optional_general.add_argument('--minGeneIdentity', type=int, metavar='N', help='Minimum typing percentage of identity of reference gene sequence covered to consider a gene to be present (value between [0, 100]). One INDEL will be considered as one difference', required=False)
-    parser_optional_general.add_argument('--minGeneDepth', type=int, metavar='N', help='Minimum typing gene average coverage depth of present positions to consider a gene to be present (default 15, or 1/3 of average sample coverage assessed by true coverage analysis)', required=False)
+    parser_optional_general.add_argument('--minGeneDepth', type=int, metavar='N',
+                                         help='Minimum typing gene average coverage depth of present positions to'
+                                              ' consider a gene to be present (default is 1/3 of average sample'
+                                              ' coverage or 15x)', required=False)
     parser_optional_general.add_argument('--doNotRemoveConsensus', action='store_true', help='Do not remove ReMatCh consensus sequences')
     parser_optional_general.add_argument('--debug', action='store_true', help='DeBug Mode: do not remove temporary files')
 
@@ -323,7 +326,9 @@ def main():
 
                     if run_successfully and sample_data_general['mean_sample_coverage'] is not None and sample_data_general['number_absent_genes'] is not None and sample_data_general['number_genes_multiple_alleles'] is not None:
                         if args.minGeneDepth is None:
-                            args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3
+                            args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
+                                                sample_data_general['mean_sample_coverage'] / 3 > 15 else \
+                                                15
 
                         exit_info = []
                         if sample_data_general['mean_sample_coverage'] < config['minimum_read_coverage']:
@@ -339,14 +344,14 @@ def main():
                             print '\n' + e + '\n'
                             if not args.noCheckPoint:
                                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                                time_taken = utils.runTime(start_time)
+                                _ = utils.runTime(start_time)
                                 sys.exit(e)
                     else:
                         e = 'TrueCoverage module did not run successfully'
                         print '\n' + e + '\n'
                         if not args.noCheckPoint:
                             clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                            time_taken = utils.runTime(start_time)
+                            _ = utils.runTime(start_time)
                             sys.exit(e)
 
                     print '\n'
@@ -364,7 +369,7 @@ def main():
             if not run_successfully:
                 if args.noCheckPoint:
                     clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                    time_taken = utils.runTime(start_time)
+                    _ = utils.runTime(start_time)
                     sys.exit('Something in the required TrueCoverage analysis went wrong')
 
         if run_successfully:
@@ -377,23 +382,24 @@ def main():
             runtime, run_successfully, sample_data_general, data_by_gene = run_rematch.run_rematch(rematch, rematch_dir, reference_file, bam_file, args.threads, config['length_extra_seq'], config['minimum_depth_presence'], config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'], config['minimum_gene_coverage'], config['minimum_gene_identity'], args.debug, args.doNotRemoveConsensus)
             if run_successfully and data_by_gene is not None:
                 if args.minGeneDepth is None:
-                    args.minGeneDepth = 15
+                    args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
+                                        sample_data_general['mean_sample_coverage'] / 3 > 15 else \
+                                        15
 
-                runtime, ignore, ignore = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'], config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
+                _, _, _ = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'], config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
             else:
                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                time_taken = utils.runTime(start_time)
+                _ = utils.runTime(start_time)
                 sys.exit('ReMatCh run for pathotyping did not run successfully')
         else:
             clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-            time_taken = utils.runTime(start_time)
+            _ = utils.runTime(start_time)
             sys.exit('Something did not run successfully')
 
     clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
 
     print '\n'
-    time_taken = utils.runTime(start_time)
-    del time_taken
+    _ = utils.runTime(start_time)
 
 
 if __name__ == "__main__":

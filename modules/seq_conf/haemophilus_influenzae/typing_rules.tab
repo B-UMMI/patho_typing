@@ -1,8 +1,15 @@
-#pathotypes	AacsA	AacsB	AacsC	AacsD	BbcsA	BbcsB	BbcsC	BbcsD	CccsA	CccsB	CccsC	CccsD	DdcsA	DdcsB	DdcsC	DdcsD	DdcsE	EecsA	EecsB	EecsC	EecsD	EecsE	EecsF	EecsG	EecsH	FfcsA	FfcsB	FfcsC
-Serotype a	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-Serotype b	0	0	0	0	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-Serotype c	0	0	0	0	0	0	0	0	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
-Serotype d	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1	1	1	0	0	0	0	0	0	0	0	0	0	0
-Serotype e	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1	1	1	1	1	1	0	0	0
-Serotype f	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	1	1
-Non Typeable	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0
+#pathotypes	HIFGL_RS05025	HIFGL_RS05250	HIFGL_RS07070	HIB_RS06975	HIFGL_RS03555	C645_RS00655	C645_RS00650	C645_RS00645	C645_RS08170	HIFGL_RS07705	HIFGL_RS07710	HIB_RS07380	HIFGL_RS06855	R2846_RS08405	HMWA	HMWB	HMWC
+NTHi_Clade_I	1	1	1	0	0	0	0	0	0	1	1	2	2	0	0	0	0
+NTHi_Clade_II	0	0	0	1	1	0	0	0	0	1	1	0	1	1	1	1	1
+NTHi_Clade_II	0	0	0	1	1	0	0	0	0	1	1	0	1	1	1	0	0
+NTHi_Clade_II	0	0	0	1	1	0	0	0	0	1	1	0	1	1	0	1	1
+NTHi_Clade_III	0	0	0	1	1	0	0	0	0	1	1	1	0	1	1	1	1
+NTHi_Clade_III	0	0	0	1	1	0	0	0	0	1	1	1	0	1	1	0	0
+NTHi_Clade_III	0	0	0	1	1	0	0	0	0	1	1	1	0	1	0	1	1
+NTHi_Clade_IV	0	0	0	1	1	1	1	1	1	0	0	2	2	0	1	1	1
+NTHi_Clade_IV	0	0	0	1	1	1	1	1	1	0	0	2	2	0	1	0	0
+NTHi_Clade_IV	0	0	0	1	1	1	1	1	1	0	0	2	2	0	0	1	1
+NTHi_Clade_V	0	0	0	1	1	0	0	0	0	1	1	2	1	0	1	1	1
+NTHi_Clade_V	0	0	0	1	1	0	0	0	0	1	1	2	1	0	1	0	0
+NTHi_Clade_V	0	0	0	1	1	0	0	0	0	1	1	2	1	0	0	1	1
+NTHi_Clade_VI	0	0	0	1	1	0	0	0	0	1	1	2	2	2	0	0	0
