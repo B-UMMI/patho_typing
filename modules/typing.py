@@ -65,8 +65,8 @@ def typing(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_identity
                 print '\n' + 'Pathotypes found:' + '\n'
                 print '\n'.join(possible_pathotypes) + '\n'
             else:
-                writer_report.write('NA' + '\n')
-                writer_extended_report.write('NA' + '\n')
+                writer_report.write('TND' + '\n')  # Type Not Determined
+                writer_extended_report.write('TND' + '\n')  # Type Not Determined
                 print '\n' + 'It was not possible to identify any possible pathotype match' + '\n'
             writer_extended_report.write('\n' + '#Genes_present' + '\n')
             writer_extended_report.write('\n'.join(genes_present) + '\n')
