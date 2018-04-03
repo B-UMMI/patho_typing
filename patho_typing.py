@@ -9,7 +9,7 @@ Illumina reads
 
 Copyright (C) 2017 Miguel Machado <mpmachado@medicina.ulisboa.pt>
 
-Last modified: July 06, 2017
+Last modified: April 03, 2018
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import modules.utils as utils
 import modules.run_rematch as run_rematch
 import modules.typing as typing
 
-version = '0.3'
+version = '0.4'
 
 
 def set_reference(species, outdir, script_path, trueCoverage):
