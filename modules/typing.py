@@ -1,7 +1,7 @@
 import os.path
 import functools
 
-import utils
+from . import utils
 
 
 # {1: {'gene_identity': 0, 'gene_mean_read_coverage': 0.0, 'gene_number_positions_multiple_alleles': 0, 'header': 'fyuA', 'gene_coverage': 0.0, 'gene_low_coverage': 100.0}}
@@ -9,8 +9,10 @@ import utils
 
 def simplify_data_by_gene(data_by_gene):
     cleaned_data_by_gene = {}
-    for counter, data in data_by_gene.items():
-        cleaned_data_by_gene[data['header'].lower()] = {'gene_identity': data['gene_identity'], 'gene_coverage': data['gene_coverage'], 'gene_depth': data['gene_mean_read_coverage']}
+    for counter, data in list(data_by_gene.items()):  # TODO: check if list works here
+        cleaned_data_by_gene[data['header'].lower()] = {'gene_identity': data['gene_identity'],
+                                                        'gene_coverage': data['gene_coverage'],
+                                                        'gene_depth': data['gene_mean_read_coverage']}
     return cleaned_data_by_gene
 
 
@@ -62,12 +64,12 @@ def typing(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_identity
             if len(possible_pathotypes) > 0:
                 writer_report.write('\n'.join(possible_pathotypes) + '\n')
                 writer_extended_report.write('\n'.join(possible_pathotypes) + '\n')
-                print '\n' + 'Pathotypes found:' + '\n'
-                print '\n'.join(possible_pathotypes) + '\n'
+                print('\n' + 'Pathotypes found:' + '\n')
+                print('\n'.join(possible_pathotypes) + '\n')
             else:
                 writer_report.write('TND' + '\n')  # Type Not Determined
                 writer_extended_report.write('TND' + '\n')  # Type Not Determined
-                print '\n' + 'It was not possible to identify any possible pathotype match' + '\n'
+                print('\n' + 'It was not possible to identify any possible pathotype match' + '\n')
             writer_extended_report.write('\n' + '#Genes_present' + '\n')
             writer_extended_report.write('\n'.join(genes_present) + '\n')
 

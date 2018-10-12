@@ -37,7 +37,7 @@ class Logger(object):
 
 
 def checkPrograms(programs_version_dictionary):
-    print '\n' + 'Checking dependencies...'
+    print('\n' + 'Checking dependencies...')
     programs = programs_version_dictionary
     which_program = ['which', '']
     listMissings = []
@@ -47,9 +47,9 @@ def checkPrograms(programs_version_dictionary):
         if not run_successfully:
             listMissings.append(program + ' not found in PATH.')
         else:
-            print stdout.splitlines()[0]
+            print(stdout.splitlines()[0])
             if programs[program][0] is None:
-                print program + ' (impossible to determine programme version) found at: ' + stdout.splitlines()[0]
+                print(program + ' (impossible to determine programme version) found at: ' + stdout.splitlines()[0])
             else:
                 if program.endswith('.jar'):
                     check_version = ['java', '-jar', stdout.splitlines()[0], programs[program][0]]
@@ -66,7 +66,7 @@ def checkPrograms(programs_version_dictionary):
                 replace_characters = ['"', 'v', 'V', '+']
                 for i in replace_characters:
                     version_line = version_line.replace(i, '')
-                print program + ' (' + version_line + ') found'
+                print(program + ' (' + version_line + ') found')
                 if programs[program][1] == '>=':
                     program_found_version = version_line.split('.')
                     program_version_required = programs[program][2].split('.')
@@ -99,25 +99,25 @@ def requiredPrograms():
 def general_information(logfile, version, outdir, time_str):
     # Check if output directory exists
 
-    print '\n' + '==========> patho_typing <=========='
-    print '\n' + 'Program start: ' + time.ctime()
+    print('\n' + '==========> patho_typing <==========')
+    print('\n' + 'Program start: ' + time.ctime())
 
     # Tells where the logfile will be stored
-    print '\n' + 'LOGFILE:'
-    print logfile
+    print('\n' + 'LOGFILE:')
+    print(logfile)
 
     # Print command
-    print '\n' + 'COMMAND:'
+    print('\n' + 'COMMAND:')
     script_path = os.path.abspath(sys.argv[0])
-    print sys.executable + ' ' + script_path + ' ' + ' '.join(sys.argv[1:])
+    print(sys.executable + ' ' + script_path + ' ' + ' '.join(sys.argv[1:]))
 
     # Print directory where programme was lunch
-    print '\n' + 'PRESENT DIRECTORY:'
+    print('\n' + 'PRESENT DIRECTORY:')
     present_directory = os.path.abspath(os.getcwd())
-    print present_directory
+    print(present_directory)
 
     # Print program version
-    print '\n' + 'VERSION:'
+    print('\n' + 'VERSION:')
     scriptVersionGit(version, present_directory, script_path)
 
     # Check programms
@@ -138,24 +138,25 @@ def setPATHvariable(doNotUseProvidedSoftware, script_path):
         os.environ['PATH'] = str(':'.join([bowtie2, samtools, bcftools, path_variable]))
 
     # Print PATH variable
-    print '\n' + 'PATH variable:'
-    print os.environ['PATH']
+    print('\n' + 'PATH variable:')
+    print(os.environ['PATH'])
 
 
 def scriptVersionGit(version, directory, script_path):
-    print 'Version ' + version
+    print('Version ' + version)
 
     try:
         os.chdir(os.path.dirname(script_path))
         command = ['git', 'log', '-1', '--date=local', '--pretty=format:"%h (%H) - Commit by %cn, %cd) : %s"']
         run_successfully, stdout, stderr = runCommandPopenCommunicate(command, False, 15, False)
-        print stdout
+        print(stdout)
         command = ['git', 'remote', 'show', 'origin']
         run_successfully, stdout, stderr = runCommandPopenCommunicate(command, False, 15, False)
-        print stdout
+        print(stdout)
         os.chdir(directory)
     except:
-        print 'HARMLESS WARNING: git command possibly not found. The GitHub repository information will not be obtained.'
+        print('HARMLESS WARNING: git command possibly not found. The GitHub repository information will not be'
+              ' obtained.')
 
 
 def runTime(start_time):
@@ -163,7 +164,7 @@ def runTime(start_time):
     time_taken = end_time - start_time
     hours, rest = divmod(time_taken, 3600)
     minutes, seconds = divmod(rest, 60)
-    print 'Runtime :' + str(hours) + 'h:' + str(minutes) + 'm:' + str(round(seconds, 2)) + 's'
+    print('Runtime :' + str(hours) + 'h:' + str(minutes) + 'm:' + str(round(seconds, 2)) + 's')
     return round(time_taken, 2)
 
 
@@ -205,24 +206,24 @@ def trace_unhandled_exceptions(func):
         try:
             func(*args, **kwargs)
         except:
-            print 'Exception in ' + func.__name__
+            print('Exception in ' + func.__name__)
             traceback.print_exc()
     return wrapped_func
 
 
 def kill_subprocess_Popen(subprocess_Popen, command):
-    print 'Command run out of time: ' + str(command)
+    print('Command run out of time: ' + str(command))
     subprocess_Popen.kill()
 
 
 def runCommandPopenCommunicate(command, shell_True, timeout_sec_None, print_comand_True):
     run_successfully = False
-    if not isinstance(command, basestring):
+    if not isinstance(command, str):
         command = ' '.join(command)
     command = shlex.split(command)
 
     if print_comand_True:
-        print 'Running: ' + ' '.join(command)
+        print('Running: ' + ' '.join(command))
 
     if shell_True:
         command = ' '.join(command)
@@ -244,13 +245,13 @@ def runCommandPopenCommunicate(command, shell_True, timeout_sec_None, print_coma
         run_successfully = True
     else:
         if not print_comand_True and not_killed_by_timer:
-            print 'Running: ' + str(command)
+            print('Running: ' + str(command))
         if len(stdout) > 0:
-            print 'STDOUT'
-            print stdout.decode("utf-8")
+            print('STDOUT')
+            print(stdout.decode("utf-8"))
         if len(stderr) > 0:
-            print 'STDERR'
-            print stderr.decode("utf-8")
+            print('STDERR')
+            print(stderr.decode("utf-8"))
     return run_successfully, stdout, stderr
 
 
@@ -258,8 +259,9 @@ def required_length(tuple_length_options, argument_name):
     class RequiredLength(argparse.Action):
         def __call__(self, parser, args, values, option_string=None):
             if len(values) not in tuple_length_options:
-                msg = 'Option {argument_name} requires one of the following number of arguments: {tuple_length_options}'.format(
-                    argument_name=self.argument_name, tuple_length_options=tuple_length_options)
+                msg = 'Option {argument_name} requires one of the following number of' \
+                      ' arguments: {tuple_length_options}'.format(argument_name=self.argument_name,
+                                                                  tuple_length_options=tuple_length_options)
                 raise argparse.ArgumentTypeError(msg)
             setattr(args, self.dest, values)
     return RequiredLength
@@ -279,11 +281,12 @@ def get_sequence_information(fasta_file, length_extra_seq):
                 if not blank_line_found:
                     if line.startswith('>'):
                         if len(temp_sequence_dict) > 0:
-                            if temp_sequence_dict.values()[0]['length'] - 2 * length_extra_seq > 0:
-                                sequence_dict[temp_sequence_dict.keys()[0]] = temp_sequence_dict.values()[0]
-                                headers[temp_sequence_dict.values()[0]['header'].lower()] = sequence_counter
+                            if list(temp_sequence_dict.values())[0]['length'] - 2 * length_extra_seq > 0:
+                                sequence_dict[list(temp_sequence_dict.keys())[0]] = list(temp_sequence_dict.values())[0]
+                                headers[list(temp_sequence_dict.values())[0]['header'].lower()] = sequence_counter
                             else:
-                                print temp_sequence_dict.values()[0]['header'] + ' sequence ignored due to length <= 0'
+                                print(list(temp_sequence_dict.values())[0]['header'] + ' sequence ignored due to '
+                                                                                       'length <= 0')
                             temp_sequence_dict = {}
 
                         if line[1:].lower() in headers:
@@ -300,18 +303,18 @@ def get_sequence_information(fasta_file, length_extra_seq):
                 blank_line_found = True
 
         if len(temp_sequence_dict) > 0:
-            if temp_sequence_dict.values()[0]['length'] - 2 * length_extra_seq > 0:
-                sequence_dict[temp_sequence_dict.keys()[0]] = temp_sequence_dict.values()[0]
-                headers[temp_sequence_dict.values()[0]['header'].lower()] = sequence_counter
+            if list(temp_sequence_dict.values())[0]['length'] - 2 * length_extra_seq > 0:
+                sequence_dict[list(temp_sequence_dict.keys())[0]] = list(temp_sequence_dict.values())[0]
+                headers[list(temp_sequence_dict.values())[0]['header'].lower()] = sequence_counter
             else:
-                print temp_sequence_dict.values()[0]['header'] + ' sequence ignored due to length <= 0'
+                print(list(temp_sequence_dict.values())[0]['header'] + ' sequence ignored due to length <= 0')
 
     return sequence_dict, headers
 
 
 def simplify_sequence_dict(sequence_dict):
     simple_sequence_dict = {}
-    for counter, info in sequence_dict.items():
+    for counter, info in list(sequence_dict.items()):  # TODO: check if list works here
         simple_sequence_dict[info['header']] = info
         del simple_sequence_dict[info['header']]['header']
     return simple_sequence_dict
@@ -335,6 +338,6 @@ def clean_headers_sequences(sequence_dict):
         new_headers[sequence_dict[i]['header'].lower()] = i
 
     if headers_changed:
-        print 'At least one of the those characters was found. Replacing those with _' + '\n'
+        print('At least one of the those characters was found. Replacing those with _' + '\n')
 
     return sequence_dict, new_headers

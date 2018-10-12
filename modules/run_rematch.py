@@ -2,7 +2,7 @@ import functools
 import os
 import sys
 
-import utils
+from . import utils
 
 
 # {'noMatter': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.noMatter.fasta', 'correct': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.correct.fasta', 'alignment': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.alignment.fasta'}
@@ -28,7 +28,7 @@ def remove_reference_stuff(outdir, reference_file):
 def clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNotRemoveConsensus, debug_mode_true):
     if not debug_mode_true:
         if not doNotRemoveConsensus:
-            for consensus_type, file_path in consensus_files.items():
+            for consensus_type, file_path in list(consensus_files.items()):  # TODO: check if list works here
                 if os.path.isfile(file_path):
                     os.remove(file_path)
         if bam_file is not None:
@@ -62,7 +62,7 @@ def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extr
 
 
 def write_report(outdir, sample_data, minimum_gene_coverage, minimum_gene_identity):
-    print 'Writing report file'
+    print('Writing report file')
     number_absent_genes = 0
     number_genes_multiple_alleles = 0
     mean_sample_coverage = 0
@@ -85,7 +85,9 @@ def write_report(outdir, sample_data, minimum_gene_coverage, minimum_gene_identi
 
         writer.write('\n'.join(['#general', '>number_absent_genes', str(number_absent_genes), '>number_genes_multiple_alleles', str(number_genes_multiple_alleles), '>mean_sample_coverage', str(round(mean_sample_coverage, 2))]) + '\n')
 
-        print '\n'.join([str('number_absent_genes: ' + str(number_absent_genes)), str('number_genes_multiple_alleles: ' + str(number_genes_multiple_alleles)), str('mean_sample_coverage: ' + str(round(mean_sample_coverage, 2)))]) + '\n'
+        print('\n'.join([str('number_absent_genes: ' + str(number_absent_genes)),
+                         str('number_genes_multiple_alleles: ' + str(number_genes_multiple_alleles)),
+                         str('mean_sample_coverage: ' + str(round(mean_sample_coverage, 2)))]) + '\n')
 
     return number_absent_genes, number_genes_multiple_alleles, mean_sample_coverage
 
@@ -102,7 +104,7 @@ def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra
     sys.path.append(os.path.join(os.path.dirname(rematch), 'modules', ''))
     import rematch_module as rematch
 
-    print 'Analysing alignment data'
+    print('Analysing alignment data')
     run_successfully, sample_data, consensus_files, consensus_sequences = sequence_data('sample', reference_file, bam_file, module_dir, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch)
 
     if run_successfully:

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
 # -*- coding: utf-8 -*-
 
@@ -7,9 +7,9 @@ patho_typing.py - In silico pathogenic typing directly from raw
 Illumina reads
 <https://github.com/B-UMMI/patho_typing/>
 
-Copyright (C) 2017 Miguel Machado <mpmachado@medicina.ulisboa.pt>
+Copyright (C) 2018 Miguel Machado <mpmachado@medicina.ulisboa.pt>
 
-Last modified: April 03, 2018
+Last modified: October 12, 2018
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import modules.utils as utils
 import modules.run_rematch as run_rematch
 import modules.typing as typing
 
-version = '0.4'
+version = '1.0'
 
 
 def set_reference(species, outdir, script_path, trueCoverage):
@@ -70,7 +70,8 @@ def set_reference(species, outdir, script_path, trueCoverage):
                 if header not in trueCoverage_sequences:
                     trueCoverage_typing_sequences[header] = typing_sequences[header]
                 else:
-                    print 'Sequence {header} of typing.fasta already present in trueCoverage.fasta'.format(header=header)
+                    print('Sequence {header} of typing.fasta already present in'
+                          ' trueCoverage.fasta'.format(header=header))
 
             reference_file = os.path.join(outdir, 'trueCoverage_typing.fasta')
             write_sequeces(reference_file, trueCoverage_typing_sequences)
@@ -175,7 +176,7 @@ def indexAlignment(alignment_file):
 
 
 def mapping_reads(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc):
-    print '\n' + 'Mapping the reads' + '\n'
+    print('\n' + 'Mapping the reads' + '\n')
     run_successfully, sam_file = run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc)
     if run_successfully:
         run_successfully, bam_file = sortAlignment(sam_file, str(os.path.splitext(sam_file)[0] + '.bam'), False, threads)
@@ -291,7 +292,7 @@ def main():
     logfile, time_str = utils.start_logger(args.outdir)
 
     script_path = utils.general_information(logfile, version, args.outdir, time_str)
-    print '\n'
+    print('\n')
 
     rematch = include_rematch_dependencies_path()
 
@@ -313,7 +314,7 @@ def main():
             if not os.path.isdir(trueCoverage_dir):
                 os.makedirs(trueCoverage_dir)
 
-            print '\n'
+            print('\n')
             run_successfully, trueCoverage_bam = split_bam(bam_file, trueCoverage_headers, trueCoverage_dir, args.threads)
             if run_successfully:
                 run_successfully = indexAlignment(trueCoverage_bam)
@@ -339,22 +340,22 @@ def main():
                             exit_info.append('Number of genes with multiple alleles ({number_genes_multiple_alleles}) higher than the maximum allowed ({maximum_number_genes_multiple_alleles})'.format(number_genes_multiple_alleles=sample_data_general['number_genes_multiple_alleles'], maximum_number_genes_multiple_alleles=config['maximum_number_genes_multiple_alleles']))
 
                         if len(exit_info) > 0:
-                            print '\n' + '\n'.join(exit_info) + '\n'
+                            print('\n' + '\n'.join(exit_info) + '\n')
                             e = 'TrueCoverage requirements not fulfilled'
-                            print '\n' + e + '\n'
+                            print('\n' + e + '\n')
                             if not args.noCheckPoint:
                                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
                                 _ = utils.runTime(start_time)
                                 sys.exit(e)
                     else:
                         e = 'TrueCoverage module did not run successfully'
-                        print '\n' + e + '\n'
+                        print('\n' + e + '\n')
                         if not args.noCheckPoint:
                             clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
                             _ = utils.runTime(start_time)
                             sys.exit(e)
 
-                    print '\n'
+                    print('\n')
                     typing_dir = os.path.join(rematch_dir, 'typing', '')
                     if not os.path.isdir(typing_dir):
                         os.makedirs(typing_dir)
@@ -398,7 +399,7 @@ def main():
 
     clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
 
-    print '\n'
+    print('\n')
     _ = utils.runTime(start_time)
 
 
