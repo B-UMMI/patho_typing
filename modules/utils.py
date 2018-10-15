@@ -90,7 +90,7 @@ def checkPrograms(programs_version_dictionary):
 
 def requiredPrograms():
     programs_version_dictionary = {}
-    programs_version_dictionary['rematch.py'] = ['--version', '>=', '3.2']
+    programs_version_dictionary['rematch.py'] = ['--version', '>=', '4.0']
     missingPrograms = checkPrograms(programs_version_dictionary)
     if len(missingPrograms) > 0:
         sys.exit('\n' + 'Errors:' + '\n' + '\n'.join(missingPrograms))
@@ -235,11 +235,11 @@ def runCommandPopenCommunicate(command, shell_True, timeout_sec_None, print_coma
     if timeout_sec_None is None:
         stdout, stderr = proc.communicate()
     else:
-        timer = Timer(timeout_sec_None, kill_subprocess_Popen, args=(proc, command,))
-        timer.start()
+        timer_run = Timer(timeout_sec_None, kill_subprocess_Popen, args=(proc, command,))
+        timer_run.start()
         stdout, stderr = proc.communicate()
-        timer.cancel()
-        not_killed_by_timer = timer.isAlive()
+        timer_run.cancel()
+        not_killed_by_timer = timer_run.isAlive()
 
     if proc.returncode == 0:
         run_successfully = True
