@@ -30,7 +30,7 @@ import os
 import time
 import sys
 
-import modules.utils as utils_patho_typing
+import modules.utils as utils
 import modules.run_rematch as run_rematch
 import modules.typing as typing
 
@@ -54,15 +54,15 @@ def set_reference(species, outdir, script_path, trueCoverage):
     if os.path.isdir(species_folder):
         typing_rules = os.path.join(species_folder, 'typing_rules.tab')
         typing_file = os.path.join(species_folder, 'typing.fasta')
-        typing_sequences, ignore = utils_patho_typing.get_sequence_information(typing_file, 0)
-        typing_sequences, typing_headers = utils_patho_typing.clean_headers_sequences(typing_sequences)
-        typing_sequences = utils_patho_typing.simplify_sequence_dict(typing_sequences)
+        typing_sequences, ignore = utils.get_sequence_information(typing_file, 0)
+        typing_sequences, typing_headers = utils.clean_headers_sequences(typing_sequences)
+        typing_sequences = utils.simplify_sequence_dict(typing_sequences)
         typing_config = os.path.join(species_folder, 'typing.config')
         if trueCoverage:
             trueCoverage_file = os.path.join(species_folder, 'trueCoverage.fasta')
-            trueCoverage_sequences, ignore = utils_patho_typing.get_sequence_information(trueCoverage_file, 0)
-            trueCoverage_sequences, trueCoverage_headers = utils_patho_typing.clean_headers_sequences(trueCoverage_sequences)
-            trueCoverage_sequences = utils_patho_typing.simplify_sequence_dict(trueCoverage_sequences)
+            trueCoverage_sequences, ignore = utils.get_sequence_information(trueCoverage_file, 0)
+            trueCoverage_sequences, trueCoverage_headers = utils.clean_headers_sequences(trueCoverage_sequences)
+            trueCoverage_sequences = utils.simplify_sequence_dict(trueCoverage_sequences)
             trueCoverage_config = os.path.join(species_folder, 'trueCoverage.config')
 
             trueCoverage_typing_sequences = trueCoverage_sequences.copy()
@@ -118,7 +118,7 @@ def index_fasta_samtools(fasta, region_None, region_outfile_none, print_comand_T
         command[4] = '>'
         command[5] = region_outfile_none
         shell_true = True
-    run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, shell_true, None, print_comand_True)
+    run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, shell_true, None, print_comand_True)
     return run_successfully, stdout
 
 
@@ -127,7 +127,7 @@ def indexSequenceBowtie2(referenceFile, threads):
         run_successfully = True
     else:
         command = ['bowtie2-build', '--threads', str(threads), referenceFile, referenceFile]
-        run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, True)
+        run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
     return run_successfully
 
 
@@ -150,7 +150,7 @@ def run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numM
         else:
             command[4] = '--very-sensitive-local'
 
-        run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, True)
+        run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
 
     if not run_successfully:
         sam_file = None
@@ -163,7 +163,7 @@ def sortAlignment(alignment_file, output_file, sortByName_True, threads):
     command = ['samtools', 'sort', '-o', output_file, '-O', outFormat_string, '', '-@', str(threads), alignment_file]
     if sortByName_True:
         command[6] = '-n'
-    run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, True)
+    run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
     if not run_successfully:
         output_file = None
     return run_successfully, output_file
@@ -171,7 +171,7 @@ def sortAlignment(alignment_file, output_file, sortByName_True, threads):
 
 def indexAlignment(alignment_file):
     command = ['samtools', 'index', alignment_file]
-    run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, True)
+    run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
     return run_successfully
 
 
@@ -190,17 +190,17 @@ def mapping_reads(fastq_files, referenceFile, threads, outdir, conserved_True, n
 
 def include_rematch_dependencies_path():
     command = ['which', 'rematch.py']
-    run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, False)
+    run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, False)
     if run_successfully:
         rematch = stdout.splitlines()[0]
-        utils_patho_typing.setPATHvariable(False, rematch)
+        utils.setPATHvariable(False, rematch)
     return rematch
 
 
 def split_bam(bam_file, list_sequences, outdir, threads):
     new_bam = os.path.join(outdir, 'partial.bam')
     command = ['samtools', 'view', '-b', '-u', '-h', '-o', new_bam, '-@', str(threads), bam_file, ' '.join(list_sequences)]
-    run_successfully, stdout, stderr = utils_patho_typing.runCommandPopenCommunicate(command, False, None, True)
+    run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
     return run_successfully, new_bam
 
 
@@ -250,7 +250,7 @@ def write_sequeces(out_file, sequences_dict):
     with open(out_file, 'wt') as writer:
         for header in sequences_dict:
             writer.write('>' + header + '\n')
-            writer.write('\n'.join(utils_patho_typing.chunkstring(sequences_dict[header]['sequence'], 80)) + '\n')
+            writer.write('\n'.join(utils.chunkstring(sequences_dict[header]['sequence'], 80)) + '\n')
 
 
 def main():
@@ -258,7 +258,7 @@ def main():
     parser.add_argument('--version', help='Version information', action='version', version=str('%(prog)s v' + version))
 
     parser_required = parser.add_argument_group('Required options')
-    parser_required.add_argument('-f', '--fastq', nargs='+', action=utils_patho_typing.required_length((1, 2), '--fastq'), type=argparse.FileType('r'), metavar=('/path/to/input/file.fq.gz'), help='Path to single OR paired-end fastq files. If two files are passed, they will be assumed as being the paired fastq files', required=True)
+    parser_required.add_argument('-f', '--fastq', nargs='+', action=utils.required_length((1, 2), '--fastq'), type=argparse.FileType('r'), metavar=('/path/to/input/file.fq.gz'), help='Path to single OR paired-end fastq files. If two files are passed, they will be assumed as being the paired fastq files', required=True)
     parser_required.add_argument('-s', '--species', nargs=2, type=str, metavar=('Yersinia', 'enterocolitica'), help='Species name', required=True)
 
     parser_optional_general = parser.add_argument_group('General facultative options')
@@ -289,9 +289,9 @@ def main():
         os.makedirs(args.outdir)
 
     # Start logger
-    logfile, time_str = utils_patho_typing.start_logger(args.outdir)
+    logfile, time_str = utils.start_logger(args.outdir)
 
-    script_path = utils_patho_typing.general_information(logfile, version, args.outdir, time_str)
+    script_path = utils.general_information(logfile, version, args.outdir, time_str)
     print('\n')
 
     rematch = include_rematch_dependencies_path()
@@ -345,14 +345,14 @@ def main():
                             print('\n' + e + '\n')
                             if not args.noCheckPoint:
                                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                                _ = utils_patho_typing.runTime(start_time)
+                                _ = utils.runTime(start_time)
                                 sys.exit(e)
                     else:
                         e = 'TrueCoverage module did not run successfully'
                         print('\n' + e + '\n')
                         if not args.noCheckPoint:
                             clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                            _ = utils_patho_typing.runTime(start_time)
+                            _ = utils.runTime(start_time)
                             sys.exit(e)
 
                     print('\n')
@@ -370,7 +370,7 @@ def main():
             if not run_successfully:
                 if args.noCheckPoint:
                     clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                    _ = utils_patho_typing.runTime(start_time)
+                    _ = utils.runTime(start_time)
                     sys.exit('Something in the required TrueCoverage analysis went wrong')
 
         if run_successfully:
@@ -390,17 +390,17 @@ def main():
                 _, _, _ = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'], config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
             else:
                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                _ = utils_patho_typing.runTime(start_time)
+                _ = utils.runTime(start_time)
                 sys.exit('ReMatCh run for pathotyping did not run successfully')
         else:
             clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-            _ = utils_patho_typing.runTime(start_time)
+            _ = utils.runTime(start_time)
             sys.exit('Something did not run successfully')
 
     clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
 
     print('\n')
-    _ = utils_patho_typing.runTime(start_time)
+    _ = utils.runTime(start_time)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import os.path
 import functools
 
-import modules.utils as utils_patho_typing
+import modules.utils as utils
 
 
 # {1: {'gene_identity': 0, 'gene_mean_read_coverage': 0.0, 'gene_number_positions_multiple_alleles': 0, 'header': 'fyuA', 'gene_coverage': 0.0, 'gene_low_coverage': 100.0}}
@@ -52,7 +52,7 @@ def possible_types(data_by_gene, typing_rules_file, min_gene_coverage, min_gene_
     return possible_pathotypes, list(set(genes_present))
 
 
-module_timer = functools.partial(utils_patho_typing.timer, name='Module Typing')
+module_timer = functools.partial(utils.timer, name='Module Typing')
 
 
 @module_timer
