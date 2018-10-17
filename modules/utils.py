@@ -59,11 +59,13 @@ def checkPrograms(programs_version_dictionary):
                 run_successfully, stdout, stderr = runCommandPopenCommunicate(check_version, False, None, False)
                 if stdout == '':
                     stdout = stderr
-                if program == 'wget':
+                if program in ['wget', 'awk']:
                     version_line = stdout.splitlines()[0].split(' ', 3)[2]
+                elif program in ['prefetch', 'fastq-dump']:
+                    version_line = stdout.splitlines()[1].split(' ')[-1]
                 else:
                     version_line = stdout.splitlines()[0].split(' ')[-1]
-                replace_characters = ['"', 'v', 'V', '+']
+                replace_characters = ['"', 'v', 'V', '+', ',']
                 for i in replace_characters:
                     version_line = version_line.replace(i, '')
                 print(program + ' (' + version_line + ') found')
@@ -81,12 +83,13 @@ def checkPrograms(programs_version_dictionary):
                         elif int(program_found_version[i]) == int(program_version_required[i]):
                             continue
                         else:
-                            listMissings.append('It is required ' + program + ' with version ' + programs[program][1] + ' ' + programs[program][2])
+                            listMissings.append('It is required ' + program + ' with version ' +
+                                                programs[program][1] + ' ' + programs[program][2])
                 else:
                     if version_line != programs[program][2]:
-                        listMissings.append('It is required ' + program + ' with version ' + programs[program][1] + ' ' + programs[program][2])
+                        listMissings.append('It is required ' + program + ' with version ' + programs[program][1] +
+                                            ' ' + programs[program][2])
     return listMissings
-
 
 def requiredPrograms():
     programs_version_dictionary = {}
@@ -235,11 +238,14 @@ def runCommandPopenCommunicate(command, shell_True, timeout_sec_None, print_coma
     if timeout_sec_None is None:
         stdout, stderr = proc.communicate()
     else:
-        timer_run = Timer(timeout_sec_None, kill_subprocess_Popen, args=(proc, command,))
-        timer_run.start()
+        time_counter = Timer(timeout_sec_None, kill_subprocess_Popen, args=(proc, command,))
+        time_counter.start()
         stdout, stderr = proc.communicate()
-        timer_run.cancel()
-        not_killed_by_timer = timer_run.isAlive()
+        time_counter.cancel()
+        not_killed_by_timer = time_counter.isAlive()
+
+    stdout = stdout.decode("utf-8")
+    stderr = stderr.decode("utf-8")
 
     if proc.returncode == 0:
         run_successfully = True
@@ -248,10 +254,10 @@ def runCommandPopenCommunicate(command, shell_True, timeout_sec_None, print_coma
             print('Running: ' + str(command))
         if len(stdout) > 0:
             print('STDOUT')
-            print(stdout.decode("utf-8"))
+            print(stdout)
         if len(stderr) > 0:
             print('STDERR')
-            print(stderr.decode("utf-8"))
+            print(stderr)
     return run_successfully, stdout, stderr
 
 

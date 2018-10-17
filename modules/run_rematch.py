@@ -2,7 +2,7 @@ import functools
 import os
 import sys
 
-from . import utils
+import modules.utils as utils_patho_typing
 
 
 # {'noMatter': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.noMatter.fasta', 'correct': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.correct.fasta', 'alignment': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.alignment.fasta'}
@@ -38,10 +38,10 @@ def clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNo
 
 def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch):
     sequence_data_outdir = os.path.join(outdir, 'sequence_data', '')
-    utils.removeDirectory(sequence_data_outdir)
+    utils_patho_typing.removeDirectory(sequence_data_outdir)
     os.mkdir(sequence_data_outdir)
 
-    sequences, headers = utils.get_sequence_information(reference_file, length_extra_seq)
+    sequences, headers = utils_patho_typing.get_sequence_information(reference_file, length_extra_seq)
 
     threads_2_use = rematch.determine_threads_2_use(len(sequences), threads)
 
@@ -50,7 +50,7 @@ def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extr
     pool = multiprocessing.Pool(processes=threads)
     for sequence_counter in sequences:
         sequence_dir = os.path.join(sequence_data_outdir, str(sequence_counter), '')
-        utils.removeDirectory(sequence_dir)
+        utils_patho_typing.removeDirectory(sequence_dir)
         os.makedirs(sequence_dir)
         pool.apply_async(rematch.analyse_sequence_data, args=(bam_file, sequences[sequence_counter], sequence_dir, sequence_counter, reference_file, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, threads_2_use,))
     pool.close()
@@ -92,13 +92,13 @@ def write_report(outdir, sample_data, minimum_gene_coverage, minimum_gene_identi
     return number_absent_genes, number_genes_multiple_alleles, mean_sample_coverage
 
 
-module_timer = functools.partial(utils.timer, name='Module ReMatCh')
+module_timer = functools.partial(utils_patho_typing.timer, name='Module ReMatCh')
 
 
 @module_timer
 def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, minimum_gene_coverage, minimum_gene_identity, debug_mode_true, doNotRemoveConsensus):
     module_dir = os.path.join(outdir, 'rematch', '')
-    utils.removeDirectory(module_dir)
+    utils_patho_typing.removeDirectory(module_dir)
     os.makedirs(module_dir)
 
     sys.path.append(os.path.join(os.path.dirname(rematch), 'modules', ''))
@@ -111,7 +111,7 @@ def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra
         number_absent_genes, number_genes_multiple_alleles, mean_sample_coverage = write_report(outdir, sample_data, minimum_gene_coverage, minimum_gene_identity)
 
     if not debug_mode_true:
-        utils.removeDirectory(module_dir)
+        utils_patho_typing.removeDirectory(module_dir)
 
     clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNotRemoveConsensus, debug_mode_true)
 
