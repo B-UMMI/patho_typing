@@ -4,7 +4,11 @@ patho_typing
 
 <https://github.com/B-UMMI/patho_typing>
 
+## Rational
 
+**patho_typing** is a tool for _in silico_ pathogenic typing sample's reads through a read mapping approach using a set of reference sequences and defined rules for sequences presence/absence.  
+Sample's reads are mapped to the given reference sequences using [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml), parsed with [Samtools](http://www.htslib.org/) and analysed via [ReMatCh](https://github.com/B-UMMI/ReMatCh). Based on the length of the sequence covered, it's depth of coverage and sequence nucleotide identity, **patho_typing** scores those for presence or absence, following defined thresholds. According to the combination of sequences present, a pathotype is returned following a set of rules for sequences presence/absence. Some of the sequences can be either present or absent.
+Reference sequences definition and presence/absence rules delineation are required pathotyping classification.
 
 Requirements
 ------------
@@ -90,8 +94,12 @@ For each *ReMatCh* run (typing and trueCoverage, the latter when required), the 
  - *rematchModule_report.txt* - Report file containing gene information: 1) gene name, 2) percentage of target gene sequence covered, 3) Mean target gene coverage depth of present positions, 4) percentage of target gene sequence with lower coverage depth, 5) number of positions in target gene sequence containing multiple alleles, 6) percentage identity of target gene sequence covered. The general sample information will also be stored: number of absent genes, number of genes with multiple alleles among the genes present and the mean sample coverage depth (only considering the genes present).
 
 
+## Citation
 
-Contact
--------
+MP Machado, J Halkilahti, M Pinto, JP Gomes, M Ramirez, M Rossi, JA Carrico. _patho_typing_ **GitHub** https://github.com/B-UMMI/patho_typing
+
+
+## Contact
+
 Miguel Machado  
 <mpmachado@medicina.ulisboa.pt>

@@ -59,22 +59,23 @@ def set_reference(species, outdir, script_path, trueCoverage):
         typing_sequences = utils.simplify_sequence_dict(typing_sequences)
         typing_config = os.path.join(species_folder, 'typing.config')
         if trueCoverage:
-            trueCoverage_file = os.path.join(species_folder, 'trueCoverage.fasta')
-            trueCoverage_sequences, ignore = utils.get_sequence_information(trueCoverage_file, 0)
-            trueCoverage_sequences, trueCoverage_headers = utils.clean_headers_sequences(trueCoverage_sequences)
-            trueCoverage_sequences = utils.simplify_sequence_dict(trueCoverage_sequences)
-            trueCoverage_config = os.path.join(species_folder, 'trueCoverage.config')
+            if os.path.isfile(os.path.join(species_folder, 'trueCoverage.fasta')):
+                trueCoverage_file = os.path.join(species_folder, 'trueCoverage.fasta')
+                trueCoverage_sequences, ignore = utils.get_sequence_information(trueCoverage_file, 0)
+                trueCoverage_sequences, trueCoverage_headers = utils.clean_headers_sequences(trueCoverage_sequences)
+                trueCoverage_sequences = utils.simplify_sequence_dict(trueCoverage_sequences)
+                trueCoverage_config = os.path.join(species_folder, 'trueCoverage.config')
 
-            trueCoverage_typing_sequences = trueCoverage_sequences.copy()
-            for header in typing_sequences:
-                if header not in trueCoverage_sequences:
-                    trueCoverage_typing_sequences[header] = typing_sequences[header]
-                else:
-                    print('Sequence {header} of typing.fasta already present in'
-                          ' trueCoverage.fasta'.format(header=header))
+                trueCoverage_typing_sequences = trueCoverage_sequences.copy()
+                for header in typing_sequences:
+                    if header not in trueCoverage_sequences:
+                        trueCoverage_typing_sequences[header] = typing_sequences[header]
+                    else:
+                        print('Sequence {header} of typing.fasta already present in'
+                              ' trueCoverage.fasta'.format(header=header))
 
-            reference_file = os.path.join(outdir, 'trueCoverage_typing.fasta')
-            write_sequeces(reference_file, trueCoverage_typing_sequences)
+                reference_file = os.path.join(outdir, 'trueCoverage_typing.fasta')
+                write_sequeces(reference_file, trueCoverage_typing_sequences)
         else:
             reference_file = os.path.join(outdir, 'typing.fasta')
             write_sequeces(reference_file, typing_sequences)
@@ -298,7 +299,9 @@ def main():
 
     args.fastq = [fastq.name for fastq in args.fastq]
 
-    reference_file, trueCoverage_file, trueCoverage_sequences, trueCoverage_headers, trueCoverage_config, typing_file, typing_sequences, typing_headers, typing_rules, typing_config = set_reference(args.species, args.outdir, script_path, args.trueCoverage)
+    reference_file, trueCoverage_file, trueCoverage_sequences, trueCoverage_headers, trueCoverage_config, typing_file, \
+    typing_sequences, typing_headers, typing_rules, typing_config = \
+        set_reference(args.species, args.outdir, script_path, args.trueCoverage)
     original_reference_file = str(reference_file)
 
     confirm_genes_fasta_rules(typing_headers, typing_rules)
@@ -310,68 +313,73 @@ def main():
             os.makedirs(rematch_dir)
 
         if args.trueCoverage:
-            trueCoverage_dir = os.path.join(rematch_dir, 'trueCoverage', '')
-            if not os.path.isdir(trueCoverage_dir):
-                os.makedirs(trueCoverage_dir)
+            if trueCoverage_file is not None:
+                trueCoverage_dir = os.path.join(rematch_dir, 'trueCoverage', '')
+                if not os.path.isdir(trueCoverage_dir):
+                    os.makedirs(trueCoverage_dir)
 
-            print('\n')
-            run_successfully, trueCoverage_bam = split_bam(bam_file, trueCoverage_headers, trueCoverage_dir, args.threads)
-            if run_successfully:
-                run_successfully = indexAlignment(trueCoverage_bam)
+                print('\n')
+                run_successfully, trueCoverage_bam = split_bam(bam_file, trueCoverage_headers, trueCoverage_dir, args.threads)
                 if run_successfully:
-                    reference_file = os.path.join(trueCoverage_dir, 'reference.fasta')
-                    write_sequeces(reference_file, trueCoverage_sequences)
-                    index_fasta_samtools(reference_file, None, None, True)
-                    config = parse_config(trueCoverage_config)
-                    runtime, run_successfully, sample_data_general, data_by_gene = run_rematch.run_rematch(rematch, trueCoverage_dir, reference_file, trueCoverage_bam, args.threads, config['length_extra_seq'], config['minimum_depth_presence'], config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'], config['minimum_gene_coverage'], config['minimum_gene_identity'], args.debug, args.doNotRemoveConsensus)
+                    run_successfully = indexAlignment(trueCoverage_bam)
+                    if run_successfully:
+                        reference_file = os.path.join(trueCoverage_dir, 'reference.fasta')
+                        write_sequeces(reference_file, trueCoverage_sequences)
+                        index_fasta_samtools(reference_file, None, None, True)
+                        config = parse_config(trueCoverage_config)
+                        runtime, run_successfully, sample_data_general, data_by_gene = run_rematch.run_rematch(rematch, trueCoverage_dir, reference_file, trueCoverage_bam, args.threads, config['length_extra_seq'], config['minimum_depth_presence'], config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'], config['minimum_gene_coverage'], config['minimum_gene_identity'], args.debug, args.doNotRemoveConsensus)
 
-                    if run_successfully and sample_data_general['mean_sample_coverage'] is not None and sample_data_general['number_absent_genes'] is not None and sample_data_general['number_genes_multiple_alleles'] is not None:
-                        if args.minGeneDepth is None:
-                            args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
-                                                sample_data_general['mean_sample_coverage'] / 3 > 15 else \
-                                                15
+                        if run_successfully and sample_data_general['mean_sample_coverage'] is not None and sample_data_general['number_absent_genes'] is not None and sample_data_general['number_genes_multiple_alleles'] is not None:
+                            if args.minGeneDepth is None:
+                                args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
+                                                    sample_data_general['mean_sample_coverage'] / 3 > 15 else \
+                                                    15
 
-                        exit_info = []
-                        if sample_data_general['mean_sample_coverage'] < config['minimum_read_coverage']:
-                            exit_info.append('Sample coverage ({mean_sample_coverage}) lower than the minimum required ({minimum_read_coverage})'.format(mean_sample_coverage=sample_data_general['mean_sample_coverage'], minimum_read_coverage=config['minimum_read_coverage']))
-                        if sample_data_general['number_absent_genes'] > config['maximum_number_absent_genes']:
-                            exit_info.append('Number of absent genes ({number_absent_genes}) higher than the maximum allowed ({maximum_number_absent_genes})'.format(number_absent_genes=sample_data_general['number_absent_genes'], maximum_number_absent_genes=config['maximum_number_absent_genes']))
-                        if sample_data_general['number_genes_multiple_alleles'] > config['maximum_number_genes_multiple_alleles']:
-                            exit_info.append('Number of genes with multiple alleles ({number_genes_multiple_alleles}) higher than the maximum allowed ({maximum_number_genes_multiple_alleles})'.format(number_genes_multiple_alleles=sample_data_general['number_genes_multiple_alleles'], maximum_number_genes_multiple_alleles=config['maximum_number_genes_multiple_alleles']))
+                            exit_info = []
+                            if sample_data_general['mean_sample_coverage'] < config['minimum_read_coverage']:
+                                exit_info.append('Sample coverage ({mean_sample_coverage}) lower than the minimum required ({minimum_read_coverage})'.format(mean_sample_coverage=sample_data_general['mean_sample_coverage'], minimum_read_coverage=config['minimum_read_coverage']))
+                            if sample_data_general['number_absent_genes'] > config['maximum_number_absent_genes']:
+                                exit_info.append('Number of absent genes ({number_absent_genes}) higher than the maximum allowed ({maximum_number_absent_genes})'.format(number_absent_genes=sample_data_general['number_absent_genes'], maximum_number_absent_genes=config['maximum_number_absent_genes']))
+                            if sample_data_general['number_genes_multiple_alleles'] > config['maximum_number_genes_multiple_alleles']:
+                                exit_info.append('Number of genes with multiple alleles ({number_genes_multiple_alleles}) higher than the maximum allowed ({maximum_number_genes_multiple_alleles})'.format(number_genes_multiple_alleles=sample_data_general['number_genes_multiple_alleles'], maximum_number_genes_multiple_alleles=config['maximum_number_genes_multiple_alleles']))
 
-                        if len(exit_info) > 0:
-                            print('\n' + '\n'.join(exit_info) + '\n')
-                            e = 'TrueCoverage requirements not fulfilled'
+                            if len(exit_info) > 0:
+                                print('\n' + '\n'.join(exit_info) + '\n')
+                                e = 'TrueCoverage requirements not fulfilled'
+                                print('\n' + e + '\n')
+                                if not args.noCheckPoint:
+                                    clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
+                                    _ = utils.runTime(start_time)
+                                    sys.exit(e)
+                        else:
+                            e = 'TrueCoverage module did not run successfully'
                             print('\n' + e + '\n')
                             if not args.noCheckPoint:
                                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
                                 _ = utils.runTime(start_time)
                                 sys.exit(e)
-                    else:
-                        e = 'TrueCoverage module did not run successfully'
-                        print('\n' + e + '\n')
-                        if not args.noCheckPoint:
-                            clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                            _ = utils.runTime(start_time)
-                            sys.exit(e)
 
-                    print('\n')
-                    typing_dir = os.path.join(rematch_dir, 'typing', '')
-                    if not os.path.isdir(typing_dir):
-                        os.makedirs(typing_dir)
-                    run_successfully, bam_file = split_bam(bam_file, typing_headers, typing_dir, args.threads)
-                    if run_successfully:
-                        run_successfully = indexAlignment(bam_file)
+                        print('\n')
+                        typing_dir = os.path.join(rematch_dir, 'typing', '')
+                        if not os.path.isdir(typing_dir):
+                            os.makedirs(typing_dir)
+                        run_successfully, bam_file = split_bam(bam_file, typing_headers, typing_dir, args.threads)
                         if run_successfully:
-                            reference_file = os.path.join(typing_dir, 'reference.fasta')
-                            write_sequeces(reference_file, typing_sequences)
-                            index_fasta_samtools(reference_file, None, None, True)
-                            rematch_dir = str(typing_dir)
-            if not run_successfully:
-                if args.noCheckPoint:
-                    clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
-                    _ = utils.runTime(start_time)
-                    sys.exit('Something in the required TrueCoverage analysis went wrong')
+                            run_successfully = indexAlignment(bam_file)
+                            if run_successfully:
+                                reference_file = os.path.join(typing_dir, 'reference.fasta')
+                                write_sequeces(reference_file, typing_sequences)
+                                index_fasta_samtools(reference_file, None, None, True)
+                                rematch_dir = str(typing_dir)
+                if not run_successfully:
+                    if args.noCheckPoint:
+                        clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
+                        _ = utils.runTime(start_time)
+                        sys.exit('Something in the required TrueCoverage analysis went wrong')
+            else:
+                print('\n'
+                      'WARNING: it was not found trueCoverage target files. trueCoverage will not run.'
+                      '\n')
 
         if run_successfully:
             config = parse_config(typing_config)
@@ -380,14 +388,20 @@ def main():
             if args.minGeneIdentity is not None:
                 config['minimum_gene_identity'] = args.minGeneIdentity
 
-            runtime, run_successfully, sample_data_general, data_by_gene = run_rematch.run_rematch(rematch, rematch_dir, reference_file, bam_file, args.threads, config['length_extra_seq'], config['minimum_depth_presence'], config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'], config['minimum_gene_coverage'], config['minimum_gene_identity'], args.debug, args.doNotRemoveConsensus)
+            runtime, run_successfully, sample_data_general, data_by_gene = \
+                run_rematch.run_rematch(rematch, rematch_dir, reference_file, bam_file, args.threads,
+                                        config['length_extra_seq'], config['minimum_depth_presence'],
+                                        config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'],
+                                        config['minimum_gene_coverage'], config['minimum_gene_identity'],
+                                        args.debug, args.doNotRemoveConsensus)
             if run_successfully and data_by_gene is not None:
                 if args.minGeneDepth is None:
                     args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
                                         sample_data_general['mean_sample_coverage'] / 3 > 15 else \
                                         15
 
-                _, _, _ = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'], config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
+                _, _, _ = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'],
+                                        config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
             else:
                 clean_pathotyping_folder(args.outdir, original_reference_file, args.debug)
                 _ = utils.runTime(start_time)

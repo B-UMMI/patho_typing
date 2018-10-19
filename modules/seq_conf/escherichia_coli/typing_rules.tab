@@ -1,3 +1,4 @@
+## 0: absence, 1: presence, 2: presence or absence
 #pathotypes	stx1A	stx1B	stx2A	stx2B	stx2fA	stx2fB	aaiC	aatA	aap	aggR	bfpA	eae	icsA	ipaH	eltA	eltB	sta1	sta2
 STEC	1	1	0	0	0	0	0	0	0	0	0	2	0	0	0	0	0	0
 STEC	0	0	1	1	2	2	0	0	0	0	0	2	0	0	0	0	0	0

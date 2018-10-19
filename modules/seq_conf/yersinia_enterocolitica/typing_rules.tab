@@ -1,3 +1,4 @@
+## 0: absence, 1: presence, 2: presence or absence
 #pathotypes	fyuA	spiA	myfA	ystA	ail	inv	ywrD	per	wbbU	wbcA	wzt
 O:3 low pathogenic (PG3)	0	1	1	1	1	1	1	0	1	0	0
 O:1,2/O:1,2,3 low pathogenic (PG6)	0	1	1	1	1	1	0	0	1	0	0
