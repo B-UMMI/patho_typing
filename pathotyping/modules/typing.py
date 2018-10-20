@@ -1,7 +1,10 @@
 import os.path
 import functools
 
-import modules.utils as utils
+try:
+    import modules.utils as utils
+except ImportError:
+    from pathotyping.modules import utils as utils
 
 
 # {1: {'gene_identity': 0, 'gene_mean_read_coverage': 0.0, 'gene_number_positions_multiple_alleles': 0, 'header': 'fyuA', 'gene_coverage': 0.0, 'gene_low_coverage': 100.0}}

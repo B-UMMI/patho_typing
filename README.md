@@ -1,6 +1,6 @@
 patho_typing
 ============
-*In silico pathogenic typing pathogenic directly from raw Illumina reads*  
+*In silico pathogenic typing directly from raw Illumina reads*  
 
 <https://github.com/B-UMMI/patho_typing>
 

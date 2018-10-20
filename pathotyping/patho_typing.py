@@ -29,12 +29,20 @@ import argparse
 import os
 import time
 import sys
+from pkg_resources import resource_filename
 
-import modules.utils as utils
-import modules.run_rematch as run_rematch
-import modules.typing as typing
+try:
+    from __init__ import __version__
 
-version = '1.0'
+    import modules.utils as utils
+    import modules.run_rematch as run_rematch
+    import modules.typing as typing
+except ImportError:
+    from pathotyping.__init__ import __version__
+
+    from pathotyping.modules import utils as utils
+    from pathotyping.modules import run_rematch as run_rematch
+    from pathotyping.modules import typing as typing
 
 
 def set_reference(species, outdir, script_path, trueCoverage):
@@ -49,7 +57,8 @@ def set_reference(species, outdir, script_path, trueCoverage):
     typing_rules = None
     typing_config = None
 
-    species_folder = os.path.join(os.path.dirname(script_path), 'modules', 'seq_conf', '_'.join([s.lower() for s in species]), '')
+    species_folder = os.path.join(os.path.dirname(script_path), 'modules', 'seq_conf',
+                                  '_'.join([s.lower() for s in species]), '')
 
     if os.path.isdir(species_folder):
         typing_rules = os.path.join(species_folder, 'typing_rules.tab')
@@ -82,14 +91,16 @@ def set_reference(species, outdir, script_path, trueCoverage):
     else:
         species_present = []
         seq_conf_folder = os.path.join(os.path.dirname(script_path), 'modules', 'seq_conf', '')
-        species_folder = [d for d in os.listdir(seq_conf_folder) if not d.startswith('.') and os.path.isdir(os.path.join(seq_conf_folder, d, ''))]
+        species_folder = [d for d in os.listdir(seq_conf_folder) if
+                          not d.startswith('.') and os.path.isdir(os.path.join(seq_conf_folder, d, ''))]
         for species in species_folder:
             species = species.split('_')
             species[0] = species[0][0].upper() + species[0][1:]
             species_present.append(' '.join(species))
         sys.exit('Only these species are available:' + '\n' + '\n'.join(species_present))
 
-    return reference_file, trueCoverage_file, trueCoverage_sequences, trueCoverage_headers, trueCoverage_config, typing_file, typing_sequences, typing_headers, typing_rules, typing_config
+    return reference_file, trueCoverage_file, trueCoverage_sequences, trueCoverage_headers, trueCoverage_config, \
+           typing_file, typing_sequences, typing_headers, typing_rules, typing_config
 
 
 def confirm_genes_fasta_rules(typing_fasta_headers, typing_rules_file):
@@ -107,7 +118,8 @@ def confirm_genes_fasta_rules(typing_fasta_headers, typing_rules_file):
             if gene.lower() not in typing_fasta_headers:
                 missing_genes.append(gene)
         if len(missing_genes) > 0:
-            sys.exit('The following genes required for typing are not present in typing fasta file: {missing_genes}'.format(missing_genes=', '.join(missing_genes)))
+            sys.exit('The following genes required for typing are not present in typing fasta'
+                     ' file: {missing_genes}'.format(missing_genes=', '.join(missing_genes)))
 
 
 def index_fasta_samtools(fasta, region_None, region_outfile_none, print_comand_True):
@@ -137,7 +149,8 @@ def run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numM
 
     run_successfully = indexSequenceBowtie2(referenceFile, threads)
     if run_successfully:
-        command = ['bowtie2', '-k', str(numMapLoc), '-q', '', '--threads', str(threads), '-x', referenceFile, '', '--no-unal', '-S', sam_file]
+        command = ['bowtie2', '-k', str(numMapLoc), '-q', '', '--threads', str(threads), '-x', referenceFile, '',
+                   '--no-unal', '-S', sam_file]
 
         if len(fastq_files) == 1:
             command[9] = '-U ' + fastq_files[0]
@@ -179,8 +192,10 @@ def indexAlignment(alignment_file):
 def mapping_reads(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc):
     print('\n' + 'Mapping the reads' + '\n')
     run_successfully, sam_file = run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc)
+    bam_file = None
     if run_successfully:
-        run_successfully, bam_file = sortAlignment(sam_file, str(os.path.splitext(sam_file)[0] + '.bam'), False, threads)
+        run_successfully, bam_file = sortAlignment(sam_file, str(os.path.splitext(sam_file)[0] + '.bam'), False,
+                                                   threads)
         if run_successfully:
             os.remove(sam_file)
             run_successfully = indexAlignment(bam_file)
@@ -190,23 +205,43 @@ def mapping_reads(fastq_files, referenceFile, threads, outdir, conserved_True, n
 
 
 def include_rematch_dependencies_path():
+    original_rematch = None
     command = ['which', 'rematch.py']
     run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, False)
     if run_successfully:
-        rematch = stdout.splitlines()[0]
-        utils.setPATHvariable(False, rematch)
-    return rematch
+        original_rematch = stdout.splitlines()[0]
+
+    resource_rematch = None
+    try:
+        resource_rematch = resource_filename('ReMatCh', 'rematch.py')
+    except Exception as e:
+        print('Exception include_rematch_dependencies_path():\n'
+              '{}'.format(e))
+        resource_rematch = original_rematch
+    else:
+        print('\n'
+              'Using ReMatCh "{resource_rematch}" via "{original_rematch}"\n'.format(resource_rematch=resource_rematch,
+                                                                                     original_rematch=original_rematch))
+    finally:
+        utils.setPATHvariable(False, resource_rematch)
+
+    return resource_rematch
 
 
 def split_bam(bam_file, list_sequences, outdir, threads):
     new_bam = os.path.join(outdir, 'partial.bam')
-    command = ['samtools', 'view', '-b', '-u', '-h', '-o', new_bam, '-@', str(threads), bam_file, ' '.join(list_sequences)]
+    command = ['samtools', 'view', '-b', '-u', '-h', '-o', new_bam, '-@', str(threads), bam_file,
+               ' '.join(list_sequences)]
     run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
     return run_successfully, new_bam
 
 
 def parse_config(config_file):
-    config = {'reference_file': None, 'length_extra_seq': None, 'maximum_number_absent_genes': None, 'maximum_number_genes_multiple_alleles': None, 'minimum_read_coverage': None, 'minimum_depth_presence': None, 'minimum_depth_call': None, 'minimum_depth_frequency_dominant_allele': None, 'minimum_gene_coverage': None, 'minimum_gene_identity': None}
+    config = {'reference_file': None, 'length_extra_seq': None, 'maximum_number_absent_genes': None,
+              'maximum_number_genes_multiple_alleles': None, 'minimum_read_coverage': None,
+              'minimum_depth_presence': None, 'minimum_depth_call': None,
+              'minimum_depth_frequency_dominant_allele': None, 'minimum_gene_coverage': None,
+              'minimum_gene_identity': None}
 
     with open(config_file, 'rtU') as reader:
         field = None
@@ -219,15 +254,20 @@ def parse_config(config_file):
                     field = line
                 else:
                     if field is not None:
-                        if field in ['length_extra_seq', 'maximum_number_absent_genes', 'maximum_number_genes_multiple_alleles', 'minimum_read_coverage', 'minimum_depth_presence', 'minimum_depth_call', 'minimum_gene_coverage', 'minimum_gene_identity']:
+                        if field in ['length_extra_seq', 'maximum_number_absent_genes',
+                                     'maximum_number_genes_multiple_alleles', 'minimum_read_coverage',
+                                     'minimum_depth_presence', 'minimum_depth_call', 'minimum_gene_coverage',
+                                     'minimum_gene_identity']:
                             line = int(line)
                             if field in ['minimum_gene_coverage', 'minimum_gene_identity']:
                                 if line < 0 or line > 100:
-                                    sys.exit('minimum_gene_coverage in trueCoverage_rematch config file must be an integer between 0 and 100')
+                                    sys.exit('minimum_gene_coverage in trueCoverage_rematch config file must be an'
+                                             ' integer between 0 and 100')
                         elif field == 'minimum_depth_frequency_dominant_allele':
                             line = float(line)
                             if line < 0 or line > 1:
-                                sys.exit('minimum_depth_frequency_dominant_allele in trueCoverage_rematch config file must be a double between 0 and 1')
+                                sys.exit('minimum_depth_frequency_dominant_allele in trueCoverage_rematch config file'
+                                         ' must be a double between 0 and 1')
                         config[field] = line
                         field = None
 
@@ -255,26 +295,45 @@ def write_sequeces(out_file, sequences_dict):
 
 
 def main():
-    parser = argparse.ArgumentParser(prog='patho_typing.py', description='In silico pathogenic typing directly from raw Illumina reads', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('--version', help='Version information', action='version', version=str('%(prog)s v' + version))
+    parser = argparse.ArgumentParser(prog='patho_typing.py',
+                                     description='In silico pathogenic typing directly from raw Illumina reads',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('--version', help='Version information', action='version',
+                        version='{prog} v{version}'.format(prog=parser.prog, version=__version__))
 
     parser_required = parser.add_argument_group('Required options')
-    parser_required.add_argument('-f', '--fastq', nargs='+', action=utils.required_length((1, 2), '--fastq'), type=argparse.FileType('r'), metavar=('/path/to/input/file.fq.gz'), help='Path to single OR paired-end fastq files. If two files are passed, they will be assumed as being the paired fastq files', required=True)
-    parser_required.add_argument('-s', '--species', nargs=2, type=str, metavar=('Yersinia', 'enterocolitica'), help='Species name', required=True)
+    parser_required.add_argument('-f', '--fastq', nargs='+', action=utils.required_length((1, 2), '--fastq'),
+                                 type=argparse.FileType('r'), metavar=('/path/to/input/file.fq.gz'),
+                                 help='Path to single OR paired-end fastq files. If two files are passed, they will be'
+                                      ' assumed as being the paired fastq files', required=True)
+    parser_required.add_argument('-s', '--species', nargs=2, type=str, metavar=('Yersinia', 'enterocolitica'),
+                                 help='Species name', required=True)
 
     parser_optional_general = parser.add_argument_group('General facultative options')
-    parser_optional_general.add_argument('-o', '--outdir', type=str, metavar='/path/to/output/directory/', help='Path to the directory where the information will be stored', required=False, default='.')
-    parser_optional_general.add_argument('-j', '--threads', type=int, metavar='N', help='Number of threads to use', required=False, default=1)
-    parser_optional_general.add_argument('--trueCoverage', action='store_true', help='Assess true coverage before continue typing')
-    parser_optional_general.add_argument('--noCheckPoint', action='store_true', help='Ignore the true coverage checking point')
-    parser_optional_general.add_argument('--minGeneCoverage', type=int, metavar='N', help='Minimum typing percentage of target reference gene sequence covered to consider a gene to be present (value between [0, 100])', required=False)
-    parser_optional_general.add_argument('--minGeneIdentity', type=int, metavar='N', help='Minimum typing percentage of identity of reference gene sequence covered to consider a gene to be present (value between [0, 100]). One INDEL will be considered as one difference', required=False)
+    parser_optional_general.add_argument('-o', '--outdir', type=str, metavar='/path/to/output/directory/',
+                                         help='Path to the directory where the information will be stored',
+                                         required=False, default='.')
+    parser_optional_general.add_argument('-j', '--threads', type=int, metavar='N', help='Number of threads to use',
+                                         required=False, default=1)
+    parser_optional_general.add_argument('--trueCoverage', action='store_true',
+                                         help='Assess true coverage before continue typing')
+    parser_optional_general.add_argument('--noCheckPoint', action='store_true',
+                                         help='Ignore the true coverage checking point')
+    parser_optional_general.add_argument('--minGeneCoverage', type=int, metavar='N',
+                                         help='Minimum typing percentage of target reference gene sequence covered to'
+                                              ' consider a gene to be present (value between [0, 100])', required=False)
+    parser_optional_general.add_argument('--minGeneIdentity', type=int, metavar='N',
+                                         help='Minimum typing percentage of identity of reference gene sequence covered'
+                                              ' to consider a gene to be present (value between [0, 100]). One INDEL'
+                                              ' will be considered as one difference', required=False)
     parser_optional_general.add_argument('--minGeneDepth', type=int, metavar='N',
                                          help='Minimum typing gene average coverage depth of present positions to'
                                               ' consider a gene to be present (default is 1/3 of average sample'
                                               ' coverage or 15x)', required=False)
-    parser_optional_general.add_argument('--doNotRemoveConsensus', action='store_true', help='Do not remove ReMatCh consensus sequences')
-    parser_optional_general.add_argument('--debug', action='store_true', help='DeBug Mode: do not remove temporary files')
+    parser_optional_general.add_argument('--doNotRemoveConsensus', action='store_true',
+                                         help='Do not remove ReMatCh consensus sequences')
+    parser_optional_general.add_argument('--debug', action='store_true',
+                                         help='DeBug Mode: do not remove temporary files')
 
     args = parser.parse_args()
 
@@ -292,7 +351,7 @@ def main():
     # Start logger
     logfile, time_str = utils.start_logger(args.outdir)
 
-    script_path = utils.general_information(logfile, version, args.outdir, time_str)
+    script_path = utils.general_information(logfile, __version__, args.outdir, time_str)
     print('\n')
 
     rematch = include_rematch_dependencies_path()
@@ -319,7 +378,8 @@ def main():
                     os.makedirs(trueCoverage_dir)
 
                 print('\n')
-                run_successfully, trueCoverage_bam = split_bam(bam_file, trueCoverage_headers, trueCoverage_dir, args.threads)
+                run_successfully, trueCoverage_bam = split_bam(bam_file, trueCoverage_headers, trueCoverage_dir,
+                                                               args.threads)
                 if run_successfully:
                     run_successfully = indexAlignment(trueCoverage_bam)
                     if run_successfully:
@@ -327,9 +387,17 @@ def main():
                         write_sequeces(reference_file, trueCoverage_sequences)
                         index_fasta_samtools(reference_file, None, None, True)
                         config = parse_config(trueCoverage_config)
-                        runtime, run_successfully, sample_data_general, data_by_gene = run_rematch.run_rematch(rematch, trueCoverage_dir, reference_file, trueCoverage_bam, args.threads, config['length_extra_seq'], config['minimum_depth_presence'], config['minimum_depth_call'], config['minimum_depth_frequency_dominant_allele'], config['minimum_gene_coverage'], config['minimum_gene_identity'], args.debug, args.doNotRemoveConsensus)
+                        runtime, run_successfully, sample_data_general, data_by_gene = \
+                            run_rematch.run_rematch(rematch, trueCoverage_dir, reference_file, trueCoverage_bam,
+                                                    args.threads, config['length_extra_seq'],
+                                                    config['minimum_depth_presence'], config['minimum_depth_call'],
+                                                    config['minimum_depth_frequency_dominant_allele'],
+                                                    config['minimum_gene_coverage'], config['minimum_gene_identity'],
+                                                    args.debug, args.doNotRemoveConsensus)
 
-                        if run_successfully and sample_data_general['mean_sample_coverage'] is not None and sample_data_general['number_absent_genes'] is not None and sample_data_general['number_genes_multiple_alleles'] is not None:
+                        if run_successfully and sample_data_general['mean_sample_coverage'] is not None and \
+                                sample_data_general['number_absent_genes'] is not None and \
+                                sample_data_general['number_genes_multiple_alleles'] is not None:
                             if args.minGeneDepth is None:
                                 args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
                                                     sample_data_general['mean_sample_coverage'] / 3 > 15 else \
@@ -337,11 +405,22 @@ def main():
 
                             exit_info = []
                             if sample_data_general['mean_sample_coverage'] < config['minimum_read_coverage']:
-                                exit_info.append('Sample coverage ({mean_sample_coverage}) lower than the minimum required ({minimum_read_coverage})'.format(mean_sample_coverage=sample_data_general['mean_sample_coverage'], minimum_read_coverage=config['minimum_read_coverage']))
+                                exit_info.append('Sample coverage ({mean}) lower than the minimum'
+                                                 ' required ({minimum})'
+                                                 ''.format(mean=sample_data_general['mean_sample_coverage'],
+                                                           minimum=config['minimum_read_coverage']))
                             if sample_data_general['number_absent_genes'] > config['maximum_number_absent_genes']:
-                                exit_info.append('Number of absent genes ({number_absent_genes}) higher than the maximum allowed ({maximum_number_absent_genes})'.format(number_absent_genes=sample_data_general['number_absent_genes'], maximum_number_absent_genes=config['maximum_number_absent_genes']))
-                            if sample_data_general['number_genes_multiple_alleles'] > config['maximum_number_genes_multiple_alleles']:
-                                exit_info.append('Number of genes with multiple alleles ({number_genes_multiple_alleles}) higher than the maximum allowed ({maximum_number_genes_multiple_alleles})'.format(number_genes_multiple_alleles=sample_data_general['number_genes_multiple_alleles'], maximum_number_genes_multiple_alleles=config['maximum_number_genes_multiple_alleles']))
+                                exit_info.append('Number of absent genes ({number}) higher than the'
+                                                 ' maximum allowed ({maximum})'
+                                                 ''.format(number=sample_data_general['number_absent_genes'],
+                                                           maximum=config['maximum_number_absent_genes']))
+                            if sample_data_general['number_genes_multiple_alleles'] > \
+                                    config['maximum_number_genes_multiple_alleles']:
+                                exit_info.append('Number of genes with multiple alleles'
+                                                 ' ({number}) higher than the maximum'
+                                                 ' allowed ({maximum})'
+                                                 ''.format(number=sample_data_general['number_genes_multiple_alleles'],
+                                                           maximum=config['maximum_number_genes_multiple_alleles']))
 
                             if len(exit_info) > 0:
                                 print('\n' + '\n'.join(exit_info) + '\n')

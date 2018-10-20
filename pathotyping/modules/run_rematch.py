@@ -3,7 +3,10 @@ import os
 import sys
 import multiprocessing
 
-import modules.utils as utils
+try:
+    import modules.utils as utils
+except ImportError:
+    from pathotyping.modules import utils as utils
 
 
 # {'noMatter': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.noMatter.fasta', 'correct': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.correct.fasta', 'alignment': '/home/ubuntu/NGStools/patho_typing/mpmachado_stuff.out_test/rematch/sample.alignment.fasta'}
