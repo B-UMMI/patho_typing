@@ -18,7 +18,7 @@ setup(
     include_package_data=True,
     data_files=[('', ['LICENSE'])],
     install_requires=[
-        'ReMatCh',
+        'ReMatCh'
     ],
     description='In silico pathogenic typing directly from raw Illumina reads',
     long_description=README,
