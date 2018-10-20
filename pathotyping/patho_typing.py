@@ -220,8 +220,11 @@ def include_rematch_dependencies_path():
         print('\n'
               'Using ReMatCh "{resource_rematch}" via "{original_rematch}"\n'.format(resource_rematch=resource_rematch,
                                                                                      original_rematch=original_rematch))
-    finally:
+
+    if resource_rematch is not None:
         utils.setPATHvariable(False, resource_rematch)
+    else:
+        sys.exit('ReMatCh not found in the PATH')
 
     return resource_rematch
 
