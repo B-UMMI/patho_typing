@@ -32,7 +32,7 @@ def remove_reference_stuff(outdir, reference_file):
 def clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNotRemoveConsensus, debug_mode_true):
     if not debug_mode_true:
         if not doNotRemoveConsensus:
-            for consensus_type, file_path in list(consensus_files.items()):  # TODO: check if list works here
+            for consensus_type, file_path in list(consensus_files.items()):
                 if os.path.isfile(file_path):
                     os.remove(file_path)
         if bam_file is not None:

@@ -341,8 +341,7 @@ def get_sequence_information(fasta_file, length_extra_seq):
 
 def simplify_sequence_dict(sequence_dict):
     simple_sequence_dict = {}
-    for counter, info in list(sequence_dict.items()):  # TODO: check if list works here
-        simple_sequence_dict[info['header']] = info
+    for counter, info in list(sequence_dict.items()):
         del simple_sequence_dict[info['header']]['header']
     return simple_sequence_dict
 

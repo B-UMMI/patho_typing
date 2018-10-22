@@ -12,7 +12,7 @@ except ImportError:
 
 def simplify_data_by_gene(data_by_gene):
     cleaned_data_by_gene = {}
-    for counter, data in list(data_by_gene.items()):  # TODO: check if list works here
+    for counter, data in list(data_by_gene.items()):
         cleaned_data_by_gene[data['header'].lower()] = {'gene_identity': data['gene_identity'],
                                                         'gene_coverage': data['gene_coverage'],
                                                         'gene_depth': data['gene_mean_read_coverage']}
