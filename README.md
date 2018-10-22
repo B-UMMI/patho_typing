@@ -1,33 +1,84 @@
-patho_typing
-============
-*In silico pathogenic typing pathogenic directly from raw Illumina reads*  
+# patho_typing
 
-<https://github.com/B-UMMI/patho_typing>
+*In silico pathogenic typing directly from raw Illumina reads*  
 
+---
 
+* [Rational](#rational)
+* [Input requirements](#input-requirements)
+* [Dependencies](#dependencies)
+  * [Install dependencies](#install-dependencies)
+* [Install patho_typing](#install-patho_typing)
+* [Usage](#usage)
+* [Outputs](#outputs)
+* [Citation](#citation)
+* [Contact](#contact)
 
-Requirements
-------------
+## Rational
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
+
+**patho_typing** is a tool for _in silico_ pathogenic typing sample's reads through a read mapping approach using a set of reference sequences and defined rules for sequences presence/absence.  
+Sample's reads are mapped to the given reference sequences using [Bowtie2](http://bowtie-bio.sourceforge.net/bowtie2/index.shtml), parsed with [Samtools](http://www.htslib.org/) and analysed via [ReMatCh](https://github.com/B-UMMI/ReMatCh). Based on the length of the sequence covered, it's depth of coverage and sequence nucleotide identity, **patho_typing** scores those for presence or absence, following defined thresholds. According to the combination of sequences present, a pathotype is returned following a set of rules for sequences presence/absence. Some of the sequences can be either present or absent.
+Reference sequences definition and presence/absence rules delineation are required pathotyping classification.
+
+## Input requirements
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
  - Fastq file
 
+## Dependencies
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
+
+* Python 3
+* [ReMatCh](https://github.com/B-UMMI/ReMatCh)
+
+### Install dependencies
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
 
-Dependencies
-------------
+ReMatCh:
+```bash
+git clone https://github.com/B-UMMI/ReMatCh.git
+cd ReMatCh
+python3 setup.py install
+```
 
- - *ReMatCh* >= v3.2 (<https://github.com/B-UMMI/ReMatCh>)
+## Install patho_typing
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
+```bash
+git clone https://github.com/B-UMMI/patho_typing.git
+cd patho_typing
+python3 setup.py install
+```
 
+## Usage
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
-Installation
-------------
-    git clone https://github.com/B-UMMI/patho_typing.git
-
-
-
-Usage
------
     usage: patho_typing.py [-h] [--version] -f /path/to/input/file.fq.gz
                            [/path/to/input/file.fq.gz ...] -s Yersinia
                            enterocolitica [-o /path/to/output/directory/] [-j N]
@@ -76,9 +127,13 @@ Usage
                             False)
 
 
+## Outputs
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
-Outputs
--------
 **run.*.log**  
 *ReMatCh* running log file.  
 
@@ -89,9 +144,21 @@ List with possible pathotypes found.
 For each *ReMatCh* run (typing and trueCoverage, the latter when required), the *rematchModule_report.txt* is kept.  
  - *rematchModule_report.txt* - Report file containing gene information: 1) gene name, 2) percentage of target gene sequence covered, 3) Mean target gene coverage depth of present positions, 4) percentage of target gene sequence with lower coverage depth, 5) number of positions in target gene sequence containing multiple alleles, 6) percentage identity of target gene sequence covered. The general sample information will also be stored: number of absent genes, number of genes with multiple alleles among the genes present and the mean sample coverage depth (only considering the genes present).
 
+## Citation
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
 
+MP Machado, J Halkilahti, M Pinto, JP Gomes, M Ramirez, M Rossi, JA Carrico. _patho_typing_ **GitHub** https://github.com/B-UMMI/patho_typing
 
-Contact
--------
+## Contact
+<html>
+ <div align="right">
+  <a href="#seq_typing">Back to top</a><br>
+ </div>
+</html>
+
 Miguel Machado  
 <mpmachado@medicina.ulisboa.pt>
