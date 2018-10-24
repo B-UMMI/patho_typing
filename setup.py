@@ -1,6 +1,16 @@
+import os
+from setuptools import setup
+
 import pathotyping
 
-from setuptools import setup
+
+def package_files(directory):
+    paths = []
+    for (path, directories, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
 
 VERSION = pathotyping.__version__
 
@@ -13,8 +23,8 @@ setup(
     packages=['pathotyping',
               'pathotyping.modules'],
     package_dir={'pathotyping': 'pathotyping'},
-    package_data={'pathotyping': ['../.git/*', '../.git/*/*', '../.git/*/*/*',
-                                  'modules/seq_conf/*/*']},
+    package_data={'pathotyping': package_files('.git') +
+                                 ['modules/seq_conf/*/*']},
     include_package_data=True,
     data_files=[('', ['LICENSE'])],
     install_requires=[
