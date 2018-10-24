@@ -58,6 +58,9 @@ git clone https://github.com/B-UMMI/ReMatCh.git
 cd ReMatCh
 python3 setup.py install
 ```
+*__NOTE__*:  
+If you don't have permission for global system installation, try the following _install_ command instead:  
+`python3 setup.py install --user`
 
 ## Install patho_typing
 <html>
@@ -71,6 +74,9 @@ git clone https://github.com/B-UMMI/patho_typing.git
 cd patho_typing
 python3 setup.py install
 ```
+*__NOTE__*:  
+If you don't have permission for global system installation, try the following _install_ command instead:  
+`python3 setup.py install --user`
 
 ## Usage
 <html>
