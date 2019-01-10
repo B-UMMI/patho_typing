@@ -90,6 +90,7 @@ If you don't have permission for global system installation, try the following _
                            enterocolitica [-o /path/to/output/directory/] [-j N]
                            [--trueCoverage] [--noCheckPoint] [--minGeneCoverage N]
                            [--minGeneIdentity N] [--minGeneDepth N]
+                           [--bowtieAlgo="--very-sensitive-local"]
                            [--doNotRemoveConsensus] [--debug]
 
     In silico pathogenic typing directly from raw Illumina reads
@@ -99,7 +100,7 @@ If you don't have permission for global system installation, try the following _
       --version             Version information
 
     Required options:
-      -f /path/to/input/file.fq.gz [/path/to/input/file.fq.gz ...], --fastq /path/to/input/file.fq.gz [/path/to/input/file.fq.gz ...]
+      -f --fastq /path/to/input/file.fq.gz [/path/to/input/file.fq.gz ...
                             Path to single OR paired-end fastq files. If two files
                             are passed, they will be assumed as being the paired
                             fastq files (default: None)
@@ -126,6 +127,16 @@ If you don't have permission for global system installation, try the following _
                             positions to consider a gene to be present (default
                             15, or 1/3 of average sample coverage assessed by true
                             coverage analysis) (default: None)
+      --bowtieAlgo="--very-sensitive-local"
+                            Bowtie2 alignment mode. It can be an end-to-end alignment
+                            (unclipped alignment) or local alignment (soft clipped
+                            alignment). Also, can choose between fast or sensitive
+                            alignments. Please check Bowtie2 manual for extra information:
+                            http://bowtie-bio.sourceforge.net/bowtie2/index.shtml .
+                            This option should be provided between quotes and starting
+                            with an empty space (like --bowtieAlgo " --very-fast") or
+                            using equal sign (like --bowtieAlgo="--very-fast")
+                            (default: "--very-sensitive-local")
       --doNotRemoveConsensus
                             Do not remove ReMatCh consensus sequences (default:
                             False)

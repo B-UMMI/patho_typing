@@ -40,7 +40,8 @@ def clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNo
         remove_reference_stuff(outdir, reference_file)
 
 
-def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch):
+def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extra_seq, minimum_depth_presence,
+                  minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch):
     sequence_data_outdir = os.path.join(outdir, 'sequence_data', '')
     utils.removeDirectory(sequence_data_outdir)
     os.mkdir(sequence_data_outdir)
@@ -52,7 +53,10 @@ def sequence_data(sample, reference_file, bam_file, outdir, threads, length_extr
         sequence_dir = os.path.join(sequence_data_outdir, str(sequence_counter), '')
         utils.removeDirectory(sequence_dir)
         os.makedirs(sequence_dir)
-        pool.apply_async(rematch.analyse_sequence_data, args=(bam_file, sequences[sequence_counter], sequence_dir, sequence_counter, reference_file, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele,))
+        pool.apply_async(rematch.analyse_sequence_data, args=(bam_file, sequences[sequence_counter], sequence_dir,
+                                                              sequence_counter, reference_file, length_extra_seq,
+                                                              minimum_depth_presence, minimum_depth_call,
+                                                              minimum_depth_frequency_dominant_allele,))
     pool.close()
     pool.join()
 
@@ -91,7 +95,9 @@ module_timer = functools.partial(utils.timer, name='Module ReMatCh')
 
 
 @module_timer
-def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, minimum_gene_coverage, minimum_gene_identity, debug_mode_true, doNotRemoveConsensus):
+def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra_seq, minimum_depth_presence,
+                minimum_depth_call, minimum_depth_frequency_dominant_allele, minimum_gene_coverage,
+                minimum_gene_identity, debug_mode_true, doNotRemoveConsensus):
     module_dir = os.path.join(outdir, 'rematch', '')
     utils.removeDirectory(module_dir)
     os.makedirs(module_dir)
@@ -100,7 +106,9 @@ def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra
     import rematch_module as rematch
 
     print('Analysing alignment data')
-    run_successfully, sample_data, consensus_files, consensus_sequences = sequence_data('sample', reference_file, bam_file, module_dir, threads, length_extra_seq, minimum_depth_presence, minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch)
+    run_successfully, sample_data, consensus_files, consensus_sequences = \
+        sequence_data('sample', reference_file, bam_file, module_dir, threads, length_extra_seq, minimum_depth_presence,
+                      minimum_depth_call, minimum_depth_frequency_dominant_allele, debug_mode_true, rematch)
 
     if run_successfully:
         number_absent_genes, number_genes_multiple_alleles, mean_sample_coverage = \
@@ -112,4 +120,8 @@ def run_rematch(rematch, outdir, reference_file, bam_file, threads, length_extra
 
     clean_rematch_folder(consensus_files, bam_file, reference_file, outdir, doNotRemoveConsensus, debug_mode_true)
 
-    return run_successfully, {'number_absent_genes': number_absent_genes if 'number_absent_genes' in locals() else None, 'number_genes_multiple_alleles': number_genes_multiple_alleles if 'number_genes_multiple_alleles' in locals() else None, 'mean_sample_coverage': round(mean_sample_coverage, 2) if 'mean_sample_coverage' in locals() else None}, sample_data if 'sample_data' in locals() else None
+    return run_successfully, \
+           {'number_absent_genes': number_absent_genes if 'number_absent_genes' in locals() else None,
+            'number_genes_multiple_alleles': number_genes_multiple_alleles if 'number_genes_multiple_alleles' in locals() else None,
+            'mean_sample_coverage': round(mean_sample_coverage, 2) if 'mean_sample_coverage' in locals() else None}, \
+           sample_data if 'sample_data' in locals() else None

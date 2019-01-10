@@ -7,9 +7,9 @@ patho_typing.py - In silico pathogenic typing directly from raw
 Illumina reads
 <https://github.com/B-UMMI/patho_typing/>
 
-Copyright (C) 2018 Miguel Machado <mpmachado@medicina.ulisboa.pt>
+Copyright (C) 2019 Miguel Machado <mpmachado@medicina.ulisboa.pt>
 
-Last modified: October 15, 2018
+Last modified: January 10, 2019
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -144,13 +144,13 @@ def indexSequenceBowtie2(referenceFile, threads):
     return run_successfully
 
 
-def run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc):
+def run_bowtie(fastq_files, referenceFile, threads, outdir, numMapLoc, bowtie_algorithm):
     sam_file = os.path.join(outdir, str('alignment.sam'))
 
     run_successfully = indexSequenceBowtie2(referenceFile, threads)
     if run_successfully:
-        command = ['bowtie2', '-k', str(numMapLoc), '-q', '', '--threads', str(threads), '-x', referenceFile, '',
-                   '--no-unal', '-S', sam_file]
+        command = ['bowtie2', '-k', str(numMapLoc), '-q', bowtie_algorithm, '--threads', str(threads), '-x',
+                   referenceFile, '', '--no-unal', '-S', sam_file]
 
         if len(fastq_files) == 1:
             command[9] = '-U ' + fastq_files[0]
@@ -158,11 +158,6 @@ def run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numM
             command[9] = '-1 ' + fastq_files[0] + ' -2 ' + fastq_files[1]
         else:
             return False, None
-
-        if conserved_True:
-            command[4] = '--sensitive'
-        else:
-            command[4] = '--very-sensitive-local'
 
         run_successfully, stdout, stderr = utils.runCommandPopenCommunicate(command, False, None, True)
 
@@ -189,9 +184,9 @@ def indexAlignment(alignment_file):
     return run_successfully
 
 
-def mapping_reads(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc):
+def mapping_reads(fastq_files, referenceFile, threads, outdir, numMapLoc, bowtie_algorithm):
     print('\n' + 'Mapping the reads' + '\n')
-    run_successfully, sam_file = run_bowtie(fastq_files, referenceFile, threads, outdir, conserved_True, numMapLoc)
+    run_successfully, sam_file = run_bowtie(fastq_files, referenceFile, threads, outdir, numMapLoc, bowtie_algorithm)
     bam_file = None
     if run_successfully:
         run_successfully, bam_file = sortAlignment(sam_file, str(os.path.splitext(sam_file)[0] + '.bam'), False,
@@ -331,6 +326,16 @@ def main():
                                          help='Minimum typing gene average coverage depth of present positions to'
                                               ' consider a gene to be present (default is 1/3 of average sample'
                                               ' coverage or 15x)', required=False)
+    parser_optional_general.add_argument('--bowtieAlgo', type=str, metavar='"--very-sensitive-local"',
+                                         help='Bowtie2 alignment mode. It can be an end-to-end alignment'
+                                              ' (unclipped alignment) or local alignment (soft clipped'
+                                              ' alignment). Also, can choose between fast or sensitive'
+                                              ' alignments. Please check Bowtie2 manual for extra information:'
+                                              ' http://bowtie-bio.sourceforge.net/bowtie2/index.shtml .'
+                                              ' This option should be provided between quotes and starting with'
+                                              ' an empty space (like --bowtieAlgo " --very-fast") or using equal'
+                                              ' sign (like --bowtieAlgo="--very-fast")',
+                                         required=False, default=['--very-sensitive-local'])
     parser_optional_general.add_argument('--doNotRemoveConsensus', action='store_true',
                                          help='Do not remove ReMatCh consensus sequences')
     parser_optional_general.add_argument('--debug', action='store_true',
@@ -366,7 +371,8 @@ def main():
 
     confirm_genes_fasta_rules(typing_headers, typing_rules)
 
-    run_successfully, bam_file = mapping_reads(args.fastq, reference_file, args.threads, args.outdir, False, 1)
+    run_successfully, bam_file = mapping_reads(args.fastq, reference_file, args.threads, args.outdir, 1,
+                                               args.bowtieAlgo)
     if run_successfully:
         rematch_dir = os.path.join(args.outdir, 'rematch', '')
         if not os.path.isdir(rematch_dir):
@@ -401,8 +407,8 @@ def main():
                                 sample_data_general['number_genes_multiple_alleles'] is not None:
                             if args.minGeneDepth is None:
                                 args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
-                                                    sample_data_general['mean_sample_coverage'] / 3 > 15 else \
-                                                    15
+                                    sample_data_general['mean_sample_coverage'] / 3 > 15 else \
+                                    15
 
                             exit_info = []
                             if sample_data_general['mean_sample_coverage'] < config['minimum_read_coverage']:
@@ -476,9 +482,8 @@ def main():
                                         args.debug, args.doNotRemoveConsensus)
             if run_successfully and data_by_gene is not None:
                 if args.minGeneDepth is None:
-                    args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 if \
-                                        sample_data_general['mean_sample_coverage'] / 3 > 15 else \
-                                        15
+                    args.minGeneDepth = sample_data_general['mean_sample_coverage'] / 3 \
+                        if sample_data_general['mean_sample_coverage'] / 3 > 15 else 15
 
                 _, _, _ = typing.typing(data_by_gene, typing_rules, config['minimum_gene_coverage'],
                                         config['minimum_gene_identity'], args.minGeneDepth, args.outdir)
